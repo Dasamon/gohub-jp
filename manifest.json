@@ -1,0 +1,18 @@
+{
+  "name": "GO HUB 日本語化",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "GO HUB データーベースサイトの日本語化",
+  "content_scripts": [{
+    "matches": ["https://db.pokemongohub.net/*"],
+    "run_at": "document_start",
+    "js": ["index.js"]
+  }],
+  "web_accessible_resources": [
+    "embeded-script.js"
+  ],
+  "permissions": [
+    "tabs",
+    "https://db.pokemongohub.net/*"
+  ]
+}
