@@ -13,6 +13,75 @@ window.MyEmbededProgram = {
 //};
 
 
+const observers = {};
+
+const translateType = (src) => {
+    const typeMap = {
+        'Bug': 'むし',
+        'Dark': 'あく',
+        'Dragon': 'ドラゴン',
+        'Electric': 'でんき',
+        'Fairy': 'フェアリー',
+        'Fighting': 'かくとう',
+        'Fire': 'ほのお',
+        'Flying': 'ひこう',
+        'Ghost': 'ゴースト',
+        'Grass': 'くさ',
+        'Ground': 'じめん',
+        'Ice': 'こおり',
+        'Normal': 'ノーマル',
+        'Poison': 'どく',
+        'Psychic': 'エスパー',
+        'Rock': 'いわ',
+        'Steel': 'はがね',
+        'Water': 'みず',
+    };
+    const ret = typeMap[src];
+    console.log('aaaaaaaaaaaaa 500', src, ret);
+    if (ret) {
+        return ret;
+    }
+    return src;
+};
+
+
+
+const translateTopPage = (node) => {
+    if (node instanceof Element) {
+        const n1 = node.querySelector('.pokemon--summary');
+        if (n1) {
+            translateTopPageSummary(n1);
+        }
+    }
+};
+
+const translateTopPageSummary = (node) => {
+    //console.log('aaaaaaaaaaaa 6000', node.innerHTML);
+    //node.innerHTML = 'hell world';
+    //console.log('aaaaaaaaaaaa 6000', node.innerHTML);
+    node.querySelectorAll('span.type span').forEach((s) => {
+        console.log('aaaaaaaaaa 6001', s.innerHTML);
+        s.innerHTML = translateType(s.innerHTML);
+    });
+    let text = node.innerHTML;
+    console.log('aaaaaaaaa 770', text);
+    text = text.replace(
+        /Pokemon GO <strong> (\S+)<\/strong> is a\s+(\S+)/,
+        (match, name, type) => {
+            console.log('aaaaaaaaa 777', name, type);
+            let r = `<strong>${name}</strong> は`;
+            if (type === 'mythical') {
+                r += '幻のポケモンで';
+            } else if (type === 'legendary') {
+                r += '伝説のポケモンで';
+            }
+            return r;
+        }
+    );
+    node.innerHTML = text;
+};
+
+
 
 
 console.log('aaaaaaaaaaaaaa 300.0');
@@ -42,29 +111,29 @@ console.log('aaaaaaaaaaaaaa 300.0');
             /* Response body */ this.responseText
             /* Request body  */ postData
             //console.log('aaaaaaaaaaaaaaaa 3001', this._url, this.responseText);
+            watch();
         });
         return send.apply(this, arguments);
     };
 
     const watch = () => {
-        console.log('aaaaaaaaaaaaaa 4000', document.location);
-        console.log('aaaaaaaaaaaaaa 4001', document.querySelectorAll('.pokemon--summary'));
-        if (document.location.href === 'https://db.pokemongohub.net/') {
-            console.log('aaaaaaaaaaaaa 4001.0');
+        const path = document.location.pathname;
+        if (observers[path])
+            return;
+        //console.log('aaaaaaaaaaaa 3900', path);
+        if (path ===  '/') {
             const elm = document.querySelectorAll('.card.featured-pokemon')[0];
             if (elm) {
-                console.log('aaaaaaaaaaaaa 4001.1');
                 const observer = new MutationObserver(records => {
                     console.log('aaaaaaaaaaaa 5000', records);
-                    observer.disconnect();
-                    for (const record of records) {
-                        if (record.addedNodes.length == 0) {
-                            continue;
+                    //observer.disconnect();
+                    records.forEach((r) => {
+                        if (r.addedNodes.length == 0) {
+                            return;
                         }
-                        const node = record.addedNodes[0];
-                        console.log('aaaaaaaaaaaa 6000', node.innerHTML);
-                        //node.innerHTML = 'hell world';
-                    }
+                        const node = r.addedNodes[0];
+                        translateTopPage(node);
+                    });
                 });
                 observer.observe(elm, {
                     subtree: true,
@@ -76,4 +145,3 @@ console.log('aaaaaaaaaaaaaa 300.0');
         }
     }
 })();
-
